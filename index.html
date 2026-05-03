@@ -426,6 +426,7 @@ body {
   background: var(--bg);
   overflow: hidden;
   flex: 1;
+  justify-content: flex-start;
 }
 .search-overlay.open {
   display: flex;
@@ -434,8 +435,11 @@ body {
 .overlay-inner {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 10px 16px 16px;
+  padding: 10px 16px 80px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 .overlay-section-label {
   font-size: 11px;
@@ -700,7 +704,7 @@ body {
 </div>
 
 <!-- STATS -->
-<div class="stats-row">
+<div class="stats-row" id="stats-row">
   <div class="stat-card">
     <div class="stat-label">Watchlist</div>
     <div class="stat-value" id="stat-watchlist">0 <span>titles</span></div>
@@ -1149,6 +1153,7 @@ function openSearch() {
   document.getElementById('search-overlay').classList.add('open');
   document.getElementById('swipe-container').style.display = 'none';
   document.getElementById('filter-bar').style.display = 'none';
+  document.getElementById('stats-row').style.display = 'none';
   document.getElementById('search-back').style.display = 'block';
   document.getElementById('search-mag').style.display = 'none';
   document.getElementById('search-input').focus();
@@ -1158,6 +1163,7 @@ function closeSearch() {
   document.getElementById('search-overlay').classList.remove('open');
   document.getElementById('swipe-container').style.display = 'flex';
   document.getElementById('filter-bar').style.display = 'flex';
+  document.getElementById('stats-row').style.display = 'grid';
   document.getElementById('search-back').style.display = 'none';
   document.getElementById('search-mag').style.display = 'block';
   document.getElementById('search-input').value = '';
