@@ -419,39 +419,22 @@ body {
   transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
 }
 
-/* ── SEARCH RESULTS OVERLAY ── */
+/* ── SEARCH RESULTS PANEL (inline, above search bar) ── */
 .search-overlay {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100%);
-  width: 100%;
-  max-width: 430px;
-  background: #0f0f0f;
-  border-bottom: 1px solid var(--border2);
-  border-radius: 0 0 22px 22px;
-  z-index: 100;
-  max-height: 78vh;
-  display: flex;
+  display: none;
   flex-direction: column;
+  background: var(--bg);
   overflow: hidden;
-  transition: transform 0.38s cubic-bezier(0.32,0.72,0,1);
+  flex: 1;
 }
 .search-overlay.open {
-  transform: translateX(-50%) translateY(0);
+  display: flex;
 }
-.overlay-handle {
-  width: 36px; height: 4px;
-  border-radius: 2px;
-  background: var(--border2);
-  margin: 0 auto 10px;
-  flex-shrink: 0;
-}
+.overlay-handle { display: none; }
 .overlay-inner {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 4px 16px 24px;
-  padding-top: calc(env(safe-area-inset-top, 0px) + 52px);
+  padding: 10px 16px 16px;
   flex: 1;
 }
 .overlay-section-label {
@@ -674,14 +657,6 @@ body {
   margin: 20px 0;
 }
 
-.search-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  display: none;
-}
-.search-backdrop.show { display: block; }
-
 /* ── TOAST ── */
 .toast {
   position: fixed;
@@ -762,6 +737,14 @@ body {
   </div>
 </div>
 
+<!-- SEARCH RESULTS (inline, fills space above search bar) -->
+<div class="search-overlay" id="search-overlay">
+  <div class="overlay-inner" id="overlay-inner">
+    <div class="overlay-section-label">RESULTS</div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
 <!-- SWIPE CONTAINER -->
 <div class="swipe-container" id="swipe-container">
   <div class="swipe-page" id="page-watchlist">
@@ -777,8 +760,9 @@ body {
 <!-- BOTTOM AREA -->
 <div class="bottom-area">
   <div class="search-bar-wrap">
-    <div class="search-bar" id="search-bar" onclick="openSearch()">
-      <span class="search-icon">🔍</span>
+    <div class="search-bar" id="search-bar">
+      <span class="search-icon" id="search-back" onclick="closeSearch()" style="display:none;cursor:pointer;font-size:18px;">←</span>
+      <span class="search-icon" id="search-mag">🔍</span>
       <input class="search-input" id="search-input" placeholder="Search movies & series…" autocomplete="off" autocorrect="off" spellcheck="false">
       <span class="search-clear" id="search-clear" onclick="clearSearch(event)">✕</span>
     </div>
@@ -792,18 +776,6 @@ body {
       <span class="nav-icon-wrap" id="icon-watched"></span>
       <div class="nav-dot"></div>
     </button>
-  </div>
-</div>
-
-<!-- SEARCH BACKDROP -->
-<div class="search-backdrop" id="search-backdrop" onclick="closeSearch()"></div>
-
-<!-- SEARCH OVERLAY -->
-<div class="search-overlay" id="search-overlay">
-  <div class="overlay-handle"></div>
-  <div class="overlay-inner" id="overlay-inner">
-    <div class="overlay-section-label">RESULTS</div>
-    <div id="search-results"></div>
   </div>
 </div>
 
@@ -1160,6 +1132,7 @@ async function fetchIMDB(m) {
 function setupSearch() {
   const input = document.getElementById('search-input');
   input.addEventListener('focus', openSearch);
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') closeSearch(); });
   input.addEventListener('input', () => {
     const v = input.value.trim();
     document.getElementById('search-clear').style.display = v ? 'block' : 'none';
@@ -1167,7 +1140,6 @@ function setupSearch() {
     if (v.length < 2) { showSearchResults([]); return; }
     searchDebounce = setTimeout(() => doSearch(v), 380);
   });
-  // manual title input live check
   document.getElementById('manual-title-input').addEventListener('input', () => {
     if (isManualMode) checkManualConfirm();
   });
@@ -1175,13 +1147,22 @@ function setupSearch() {
 
 function openSearch() {
   document.getElementById('search-overlay').classList.add('open');
-  document.getElementById('search-backdrop').classList.add('show');
+  document.getElementById('swipe-container').style.display = 'none';
+  document.getElementById('filter-bar').style.display = 'none';
+  document.getElementById('search-back').style.display = 'block';
+  document.getElementById('search-mag').style.display = 'none';
   document.getElementById('search-input').focus();
 }
 
 function closeSearch() {
   document.getElementById('search-overlay').classList.remove('open');
-  document.getElementById('search-backdrop').classList.remove('show');
+  document.getElementById('swipe-container').style.display = 'flex';
+  document.getElementById('filter-bar').style.display = 'flex';
+  document.getElementById('search-back').style.display = 'none';
+  document.getElementById('search-mag').style.display = 'block';
+  document.getElementById('search-input').value = '';
+  document.getElementById('search-clear').style.display = 'none';
+  document.getElementById('search-results').innerHTML = '';
   document.getElementById('search-input').blur();
 }
 
